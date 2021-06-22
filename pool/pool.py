@@ -45,7 +45,8 @@ from chia.pools.pool_puzzles import (
 
 from difficulty_adjustment import get_new_difficulty
 from singleton import create_absorb_transaction, get_and_validate_singleton_state_inner, get_coin_spend
-from store import FarmerRecord, PoolStore
+from store import PoolStore
+from record import FarmerRecord
 from util import error_dict
 
 
