@@ -45,7 +45,8 @@ from chia.pools.pool_puzzles import (
 
 from .difficulty_adjustment import get_new_difficulty
 from .singleton import create_absorb_transaction, get_and_validate_singleton_state_inner, get_coin_spend
-from .store.sqlite_store import PoolStore
+from .store.abstract import AbstractPoolStore
+from .store.sqlite_store import SqlitePoolStore
 from .record import FarmerRecord
 from .util import error_dict
 
@@ -75,7 +76,7 @@ class Pool:
         self.node_rpc_client = None
         self.wallet_rpc_client = None
 
-        self.store: Optional[PoolStore] = None
+        self.store: AbstractPoolStore = SqlitePoolStore()
 
         self.pool_fee = pool_config["pool_fee"]
 
@@ -170,7 +171,7 @@ class Pool:
         self.wallet_rpc_client: Optional[WalletRpcClient] = None
 
     async def start(self):
-        self.store = await PoolStore.create()
+        await self.store.connect()
         self.pending_point_partials = asyncio.Queue()
 
         self_hostname = self.config["self_hostname"]
