@@ -52,7 +52,8 @@ from .util import error_dict
 
 
 class Pool:
-    def __init__(self, private_key: PrivateKey, config: Dict, constants: ConsensusConstants):
+    def __init__(self, private_key: PrivateKey, config: Dict, constants: ConsensusConstants,
+                 pool_store: Optional[AbstractPoolStore] = None):
         self.follow_singleton_tasks: Dict[bytes32, asyncio.Task] = {}
         self.log = logging
         # If you want to log to a file: use filename='example.log', encoding='utf-8'
@@ -76,7 +77,7 @@ class Pool:
         self.node_rpc_client = None
         self.wallet_rpc_client = None
 
-        self.store: AbstractPoolStore = SqlitePoolStore()
+        self.store: AbstractPoolStore = pool_store or SqlitePoolStore()
 
         self.pool_fee = pool_config["pool_fee"]
 
