@@ -28,8 +28,10 @@ from chia.util.ints import uint8, uint64, uint32
 from chia.util.default_root import DEFAULT_ROOT_PATH
 from chia.util.config import load_config
 
+from .difficulty_adjustment import get_new_difficulty
 from .record import FarmerRecord
 from .pool import Pool
+from .payment_manger.abstract import AbstractPaymentManager
 from .store.abstract import AbstractPoolStore
 from .util import error_response
 
@@ -49,10 +51,12 @@ def check_authentication_token(launcher_id: bytes32, token: uint64, timeout: uin
 
 
 class PoolServer:
-    def __init__(self, config: Dict, constants: ConsensusConstants, pool_store: Optional[AbstractPoolStore] = None):
+    def __init__(self, config: Dict, constants: ConsensusConstants, pool_store: Optional[AbstractPoolStore] = None,
+                 difficulty_function: Callable = get_new_difficulty,
+                 payment_manager: Optional[AbstractPaymentManager] = None):
 
         self.log = logging.getLogger(__name__)
-        self.pool = Pool(config, constants, pool_store)
+        self.pool = Pool(config, constants, pool_store, difficulty_function, payment_manager)
 
     async def start(self):
         await self.pool.start()
