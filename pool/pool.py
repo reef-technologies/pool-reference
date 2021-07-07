@@ -49,7 +49,7 @@ from .singleton import get_singleton_state, get_coin_spend
 from .store.abstract import AbstractPoolStore
 from .store.sqlite_store import SqlitePoolStore
 from .record import FarmerRecord
-from .util import error_dict
+from .util import error_dict, RequestMetadata
 
 
 class Pool:
@@ -255,7 +255,7 @@ class Pool:
             error_stack = traceback.format_exc()
             self.log.error(f"Exception in confirming partial: {e} {error_stack}")
 
-    async def add_farmer(self, request: PostFarmerRequest) -> Dict:
+    async def add_farmer(self, request: PostFarmerRequest, metadata: RequestMetadata) -> Dict:
         async with self.store.lock:
             farmer_record: Optional[FarmerRecord] = await self.store.get_farmer_record(request.payload.launcher_id)
             if farmer_record is not None:
@@ -320,7 +320,7 @@ class Pool:
                 request.payload.payout_instructions,
                 True,
             )
-            await self.store.add_farmer_record(farmer_record)
+            await self.store.add_farmer_record(farmer_record, metadata)
             self.payment_manager.register_new_farmer(farmer_record)
 
             return PostFarmerResponse(self.welcome_message).to_json_dict()
