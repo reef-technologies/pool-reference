@@ -499,15 +499,20 @@ class Pool:
             else:
                 return await self.node_rpc_client.get_recent_signage_point_or_eos(partial.payload.sp_hash, None)
 
-        response = await get_signage_point_or_eos()
-        if response is None:
-            # Try again after 10 seconds in case we just didn't yet receive the signage point
-            await asyncio.sleep(10)
+        response = None
+        for i in range(5):
+            if i:
+                await asyncio.sleep(20)
             response = await get_signage_point_or_eos()
-
-        if response is None or response["reverted"]:
+            if response is not None:
+                break
+        if response is None:
             return error_dict(
                 PoolErrorCode.NOT_FOUND, f"Did not find signage point or EOS {partial.payload.sp_hash}, {response}"
+            )
+        if response["reverted"]:
+            return error_dict(
+                PoolErrorCode.NOT_FOUND, f"Signage point reverted {partial.payload.sp_hash}, {response}"
             )
         node_time_received_sp = response["time_received"]
 
