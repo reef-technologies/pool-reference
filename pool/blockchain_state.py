@@ -9,7 +9,8 @@ class StateKeeper:
     """
     Manager for a task periodically syncing the state of the blockchain and the wallet
     """
-    def __init__(self, logger, wallet_fingerprint):
+    def __init__(self, logger, wallet_fingerprint, use_wallet=True):
+        self.use_wallet = use_wallet
         self._logger = logger
         self._node_rpc_client: Optional[FullNodeRpcClient] = None
         self._wallet_rpc_client: Optional[WalletRpcClient] = None
@@ -31,7 +32,8 @@ class StateKeeper:
         self._node_rpc_client = node_rpc_client
         self._wallet_rpc_client = wallet_rpc_client
         self.blockchain_state = await self._node_rpc_client.get_blockchain_state()
-        self.wallet_synced = await self._wallet_rpc_client.get_synced()
+        if self.use_wallet:
+            self.wallet_synced = await self._wallet_rpc_client.get_synced()
 
         self._get_peak_loop_task = asyncio.create_task(self.get_peak_loop())
 
@@ -49,7 +51,8 @@ class StateKeeper:
         while True:
             try:
                 self.blockchain_state = await self._node_rpc_client.get_blockchain_state()
-                self.wallet_synced = await self._wallet_rpc_client.get_synced()
+                if self.use_wallet:
+                    self.wallet_synced = await self._wallet_rpc_client.get_synced()
                 await asyncio.sleep(30)
             except asyncio.CancelledError:
                 self._logger.info("Cancelled get_peak_loop, closing")
