@@ -143,14 +143,15 @@ class Pool:
         self.wallet_rpc_client: Optional[WalletRpcClient] = None
         self.wallet_rpc_port = pool_config["wallet_rpc_port"]
 
-        self.state_keeper = StateKeeper(self.log, self.wallet_fingerprint)
+        self.state_keeper = StateKeeper(self.log, self.wallet_fingerprint, use_wallet=False)
 
     async def start(self):
         await self.store.connect()
         self.pending_point_partials = asyncio.Queue()
 
         await self.init_node_rpc()
-        await self.init_wallet_rpc()
+        if False:
+            await self.init_wallet_rpc()
 
         await self.state_keeper.start(self.node_rpc_client, self.wallet_rpc_client)
         await self.payment_manager.start(self.node_rpc_client, self.wallet_rpc_client, self.store, self.state_keeper)
