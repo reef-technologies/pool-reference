@@ -381,10 +381,13 @@ class Pool:
                 farmer_dict["difficulty"] = request.payload.suggested_difficulty
 
         async def update_farmer_later():
-            await asyncio.sleep(self.farmer_update_cooldown_seconds)
-            await self.store.add_farmer_record(FarmerRecord.from_json_dict(farmer_dict), metadata)
-            self.farmer_update_blocked.remove(launcher_id)
-            self.log.info(f"Updated farmer: {response_dict}")
+            try:
+                await asyncio.sleep(self.farmer_update_cooldown_seconds)
+                await self.store.add_farmer_record(FarmerRecord.from_json_dict(farmer_dict), metadata)
+                self.farmer_update_blocked.remove(launcher_id)
+                self.log.info(f"Updated farmer: {response_dict}")
+            except:
+                self.log.exception(f"Error updating farmer {launcher_id}")
 
         self.farmer_update_blocked.add(launcher_id)
         await asyncio.create_task(update_farmer_later())
