@@ -57,6 +57,6 @@ class StateKeeper:
             except asyncio.CancelledError:
                 self._logger.info("Cancelled get_peak_loop, closing")
                 return
-            except Exception as e:
-                self._logger.error(f"Unexpected error in get_peak_loop: {e}")
+            except:
+                self._logger.exception(f"Unexpected error in get_peak_loop:")
                 await asyncio.sleep(30)
